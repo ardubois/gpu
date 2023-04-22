@@ -1,0 +1,5 @@
+nvcc --shared --compiler-options '-fPIC' -o priv/addVectors.so c_src/addVectors.cu
+cc -fPIC      -Wl,-undefined -Wl,dynamic_lookup -shared -o printMatrec.so printMatrec.c
+
+nvcc -shared --compiler-options '-fPIC' -o printMatrec.so printMatrec.c 
+
