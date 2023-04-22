@@ -16,7 +16,7 @@ void addVectors(float *result, float *a, float *b, int N)
 
 extern "C" void addVectors_call(ErlNifEnv *env, const ERL_NIF_TERM argv[], ErlNifResourceType* type)
 {
-printf("ok kernel\n");
+//printf("ok kernel\n");
 fflush(stdout);
 ERL_NIF_TERM list;
 ERL_NIF_TERM head;
@@ -57,7 +57,7 @@ enif_get_int(env, head, &arg4);
 list = tail;
 //printf("Arg 4 %d\n",arg4);
 
-printf("yo\n");
+//printf("yo\n");
 addVectors<<<blocks, threads>>>(arg1, arg2, arg3, arg4);
 //addVectors<<<blocks, threads>>>();
 }

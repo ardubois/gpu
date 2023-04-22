@@ -39,7 +39,7 @@ static ERL_NIF_TERM create_ref_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
   matrix +=2; 
 
   cudaMalloc( (void**)&dev_matrix, data_size);
-  printf("Pointer to matrix: %p\n",dev_matrix);
+  //printf("Pointer to matrix: %p\n",dev_matrix);
   cudaMemcpy( dev_matrix, matrix, data_size, cudaMemcpyHostToDevice );
 
   
@@ -63,7 +63,7 @@ static ERL_NIF_TERM new_ref_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM arg
   data_size = data_size * sizeof(float);
   cudaMalloc( (void**)&dev_matrix, data_size);
   
-  printf("pointer to new matrix: %p\n",dev_matrix);
+  //printf("pointer to new matrix: %p\n",dev_matrix);
   float **gpu_res = (float**)enif_alloc_resource(ARRAY_TYPE, sizeof(float *));
   *gpu_res = dev_matrix;
   ERL_NIF_TERM term = enif_make_resource(env, gpu_res);
