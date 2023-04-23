@@ -28,6 +28,25 @@ end
 def load_kernel_nif(_matrex) do
   raise "NIF new_ref_nif/1 not implemented"
 end
+def kernel(s) do
+  s
+end
+def build_kernel(kernel,kernelname,nargs,types) do
+  accessfunc = GPU.Backend.gen_c_kernel(kernelname,nargs,Enum.reverse(types))
+  file = File.open!("c_src/#{kernelname}.cu", [:write])
+  IO.write(file, "#include \"erl_nif.h\"\n\n" <> kernel <> "\n\n" <> accessfunc)
+  File.close(file)
+  {result, _errcode} = System.cmd("nvcc",
+      ["--shared",
+        "--compiler-options",
+        "'-fPIC'",
+        "-o",
+        "priv/#{kernelname}.so",
+        "c_src/#{kernelname}.cu"
+      ], stderr_to_stdout: true)
+  IO.puts(result)
+  GPU.load_kernel_nif(kernelname)
+end
 def spawn_nif(_k,_t,_b,_l) do
   raise "NIF spawn_nif/1 not implemented"
 end
