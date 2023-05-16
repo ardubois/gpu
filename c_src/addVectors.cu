@@ -32,7 +32,7 @@ list= argv[3];
 
 enif_get_list_cell(env,list,&head,&tail);
 //printf("term type %d\n",enif_term_type(env,head));
-int resp=enif_get_resource(env, head, type, (void **) &array_res);
+enif_get_resource(env, head, type, (void **) &array_res);
 float *arg1 = *array_res;
 list = tail;
 //printf("Pointer to matrix: %p\n",arg1);

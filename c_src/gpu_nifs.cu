@@ -52,6 +52,11 @@ static ERL_NIF_TERM create_ref_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
   return term;
 }
 
+static ERL_NIF_TERM synchronize_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+
+  cudaDeviceSynchronize();
+  return enif_make_int(env, 0);
+}
 static ERL_NIF_TERM new_ref_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   float         *dev_matrix;
   int data_size;
@@ -178,8 +183,8 @@ static ErlNifFunc nif_funcs[] = {
     {"spawn_nif", 4,spawn_nif},
     {"create_ref_nif", 1, create_ref_nif},
     {"new_ref_nif", 1, new_ref_nif},
-    {"get_matrex_nif", 3, get_matrex_nif}
-    
+    {"get_matrex_nif", 3, get_matrex_nif},
+    {"synchronize_nif", 0, synchronize_nif}
 };
 
 ERL_NIF_INIT(Elixir.GPU, nif_funcs, &load, NULL, NULL, NULL)
