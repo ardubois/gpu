@@ -41,11 +41,10 @@ defmodule GPU do
      File.close(file)
      #IO.puts k
      #IO.puts accessfunc
-     quote do
-        def unquote(header)do
-          IO.puts "hello"
-        end
-      end
+     #quote do
+      #  def unquote(header)do
+       ##end
+      #end
   end
   def create_ref_nif(_matrex) do
     raise "NIF create_ref_nif/1 not implemented"
