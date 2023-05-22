@@ -45,7 +45,7 @@ defmodule GPU.CudaBackend do
         {:if, _, if_com} ->
             genIf(if_com)
         {:var, _ , [{var,_,[{:=, _, [{type,_,nil}, exp]}]}]} ->
-          IO.puts "aqui"
+          #IO.puts "aqui"
           gexp = gen_exp exp
           "#{to_string type} #{to_string var} = #{gexp};"
         {:var, _ , [{var,_,[{:=, _, [type, exp]}]}]} ->
