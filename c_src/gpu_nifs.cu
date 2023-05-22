@@ -34,7 +34,7 @@ static ERL_NIF_TERM create_ref_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
   if (!enif_inspect_binary(env, argv[0], &matrix_el)) return enif_make_badarg(env);
 
   matrix = (float *) matrix_el.data;
-  uint64_t data_size = sizeof(float)*MX_LENGTH(matrix);
+  uint64_t data_size = sizeof(float)*(MX_LENGTH(matrix)-2);
   
   matrix +=2; 
 
@@ -52,11 +52,6 @@ static ERL_NIF_TERM create_ref_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
   return term;
 }
 
-static ERL_NIF_TERM synchronize_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-
-  cudaDeviceSynchronize();
-  return enif_make_int(env, 0);
-}
 static ERL_NIF_TERM new_ref_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   float         *dev_matrix;
   int data_size;
@@ -100,13 +95,14 @@ static ERL_NIF_TERM get_matrex_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
   float *dev_array = *array_res;
 
   int result_size = sizeof(float) * (nrow*ncol+2);
+  int data_size = sizeof(float) * (nrow*ncol);
   float *result_data = (float *) enif_make_new_binary(env, result_size, &result);
 
   float *ptr_matrix ;
   ptr_matrix = result_data;
   ptr_matrix +=2;
 
-  cudaMemcpy( dev_array, ptr_matrix, result_size, cudaMemcpyHostToDevice );
+  cudaMemcpy(ptr_matrix, dev_array, data_size, cudaMemcpyDeviceToHost );
 
   MX_SET_ROWS(result_data, nrow);
   MX_SET_COLS(result_data, ncol);
@@ -114,6 +110,11 @@ static ERL_NIF_TERM get_matrex_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
   return result;
 }
 
+static ERL_NIF_TERM synchronize_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+
+  cudaDeviceSynchronize();
+  return enif_make_int(env, 0);
+}
 
 static ERL_NIF_TERM load_kernel_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
    
