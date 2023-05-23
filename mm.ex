@@ -20,11 +20,15 @@ m = 1000
 n = 1000
 k = 1000
 
-list = [Enum.to_list(1..(m*k))]
-mat = Matrex.new(list)
 
-a=GPU.create_ref(mat)
-b=GPU.create_ref(mat)
+mat = Matrex.fill(1,m*k,1)
+
+f = fn _ -> Enum.random(1..10) end
+
+mat1 = Matrex.apply(mat,f)
+mat2 = Matrex.apply(mat,f)
+a=GPU.create_ref(mat1)
+b=GPU.create_ref(mat2)
 c=GPU.new_ref(m*k)
 
 ker=GPU.build('mm')
@@ -40,3 +44,14 @@ GPU.synchronize()
 result = GPU.get_matrex(c)
 IO.inspect result
 #IO.puts GPU.Backend.gen_c_kernel('addVectors',4,[])
+
+amat = Matrex.reshape(mat1,m,k)
+bmat = Matrex.reshape(mat2,m,k)
+cmat = Matrex.dot(amat,bmat)
+
+rmat = Matrex.reshape(result,m,k)
+
+fmat = Matrex.subtract(cmat,rmat)
+
+
+IO.inspect(Matrex.sum(fmat))
