@@ -202,7 +202,7 @@ defmodule GPU.CudaBackend do
   def gen_arg_int(narg) do
 "  enif_get_list_cell(env,list,&head,&tail);
   int arg#{narg};
-  enif_get_int(env, head, &arg4);
+  enif_get_int(env, head, &arg#{narg});
   list = tail;
 
 "
@@ -211,7 +211,7 @@ defmodule GPU.CudaBackend do
 "  enif_get_list_cell(env,list,&head,&tail);
   double darg#{narg};
   float arg#{narg};
-  enif_get_double(env, head, &darg4);
+  enif_get_double(env, head, &darg#{narg});
   arg#{narg} = (float) darg#{narg};
   list = tail;
 
@@ -220,7 +220,7 @@ defmodule GPU.CudaBackend do
   def gen_arg_double(narg) do
 "  enif_get_list_cell(env,list,&head,&tail);
   double arg#{narg};
-  enif_get_double(env, head, &darg4);
+  enif_get_double(env, head, &darg#{narg});
   list = tail;
 
 "
