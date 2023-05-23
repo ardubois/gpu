@@ -20,12 +20,12 @@ m = 1000
 n = 1000
 k = 1000
 
-list = [Enum.to_list(1..1000)]
+list = [Enum.to_list(1..(m*k))]
 mat = Matrex.new(list)
 
 a=GPU.create_ref(mat)
 b=GPU.create_ref(mat)
-c=GPU.new_ref(25)
+c=GPU.new_ref(m*k)
 
 ker=GPU.build('mm')
 
