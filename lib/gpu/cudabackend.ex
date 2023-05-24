@@ -153,7 +153,7 @@ defmodule GPU.CudaBackend do
     cudaError_t error_gpu = cudaGetLastError();
     if(error_gpu != cudaSuccess)
      { char message[200];
-       strcpy(message,\"Error synchronize_nif: \");
+       strcpy(message,\"Error kernel call: \");
        strcat(message, cudaGetErrorString(error_gpu));
        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
      }
