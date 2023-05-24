@@ -16,12 +16,18 @@
 ErlNifResourceType *KERNEL_TYPE;
 ErlNifResourceType *ARRAY_TYPE;
 
+void
+dev_array_destructor(ErlNifEnv *env, void *res) {
+  float **dev_array = (float**) res;
+  cudaFree(*dev_array);
+}
+
 static int
 load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
   KERNEL_TYPE =
   enif_open_resource_type(env, NULL, "kernel", NULL, ERL_NIF_RT_CREATE  , NULL);
   ARRAY_TYPE =
-  enif_open_resource_type(env, NULL, "gpu_ref", NULL, ERL_NIF_RT_CREATE  , NULL);
+  enif_open_resource_type(env, NULL, "gpu_ref", dev_array_destructor, ERL_NIF_RT_CREATE  , NULL);
   return 0;
 }
 
@@ -30,6 +36,7 @@ static ERL_NIF_TERM create_ref_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
   ErlNifBinary  matrix_el;
   float         *matrix;
   float         *dev_matrix;
+  cudaError_t error_gpu;
   
   if (!enif_inspect_binary(env, argv[0], &matrix_el)) return enif_make_badarg(env);
 
@@ -38,11 +45,27 @@ static ERL_NIF_TERM create_ref_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
   
   matrix +=2; 
 
+  ///// MAKE CUDA CALL
   cudaMalloc( (void**)&dev_matrix, data_size);
-  //printf("Pointer to matrix: %p\n",dev_matrix);
+  error_gpu = cudaGetLastError();
+  if(error_gpu != cudaSuccess)  
+      { char message[200];
+        strcpy(message,"Error create_ref_nif: ");
+        strcat(message, cudaGetErrorString(error_gpu));
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+      }
+  ///// MAKE CUDA CALL
   cudaMemcpy( dev_matrix, matrix, data_size, cudaMemcpyHostToDevice );
-
+  error_gpu = cudaGetLastError();
+  if(error_gpu != cudaSuccess)  
+      { char message[200];
+        strcpy(message,"Error create_ref_nif: ");
+        strcat(message, cudaGetErrorString(error_gpu));
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+      }
   
+  /////////// END CUDA CALL
+
   float **gpu_res = (float**)enif_alloc_resource(ARRAY_TYPE, sizeof(float *));
   *gpu_res = dev_matrix;
   ERL_NIF_TERM term = enif_make_resource(env, gpu_res);
@@ -55,15 +78,27 @@ static ERL_NIF_TERM create_ref_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
 static ERL_NIF_TERM new_ref_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   float         *dev_matrix;
   int data_size;
+  cudaError_t error_gpu;
   
   if (!enif_get_int(env, argv[0], &data_size)) {
       return enif_make_badarg(env);
   }
  
   data_size = data_size * sizeof(float);
+
+  //// MAKE CUDA CALL
   cudaMalloc( (void**)&dev_matrix, data_size);
-  
-  //printf("pointer to new matrix: %p\n",dev_matrix);
+  error_gpu = cudaGetLastError();
+  if(error_gpu != cudaSuccess)  
+      { char message[200];
+        strcpy(message,"Error new_ref_nif: ");
+        strcat(message, cudaGetErrorString(error_gpu));
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+      }
+
+  //END CUDA CALL
+
+
   float **gpu_res = (float**)enif_alloc_resource(ARRAY_TYPE, sizeof(float *));
   *gpu_res = dev_matrix;
   ERL_NIF_TERM term = enif_make_resource(env, gpu_res);
@@ -79,6 +114,7 @@ static ERL_NIF_TERM get_matrex_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
   int ncol;
   ERL_NIF_TERM  result;
   float **array_res;
+  cudaError_t error_gpu;
   
   if (!enif_get_resource(env, argv[0], ARRAY_TYPE, (void **) &array_res)) {
     return enif_make_badarg(env);
@@ -102,7 +138,17 @@ static ERL_NIF_TERM get_matrex_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
   ptr_matrix = result_data;
   ptr_matrix +=2;
 
+
+  //// MAKE CUDA CALL
   cudaMemcpy(ptr_matrix, dev_array, data_size, cudaMemcpyDeviceToHost );
+  error_gpu = cudaGetLastError();
+  if(error_gpu != cudaSuccess)  
+      { char message[200];
+        strcpy(message,"Error get_matrex_nif: ");
+        strcat(message, cudaGetErrorString(error_gpu));
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+      }
+  //////// END CUDA CALL
 
   MX_SET_ROWS(result_data, nrow);
   MX_SET_COLS(result_data, ncol);
@@ -111,8 +157,18 @@ static ERL_NIF_TERM get_matrex_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
 }
 
 static ERL_NIF_TERM synchronize_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+  cudaError_t error_gpu;
 
+  ////// MAKE CUDA CALL
   cudaDeviceSynchronize();
+  error_gpu = cudaGetLastError();
+  if(error_gpu != cudaSuccess)  
+      { char message[200];
+        strcpy(message,"Error synchronize_nif: ");
+        strcat(message, cudaGetErrorString(error_gpu));
+        enif_raise_exception(env,enif_make_string(env, message, ERL_NIF_LATIN1));
+      }
+  //// END CUDA CALL
   return enif_make_int(env, 0);
 }
 
