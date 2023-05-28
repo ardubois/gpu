@@ -43,7 +43,7 @@ kernel julia_kernel(ptr,dim,[:matrex,:int]) do
 
 end
 def julia_seq(dim, [{y,x}], array) do
-  kernel(dim,{y,x},array)
+  gen_pixel(dim,{y,x},array)
 end
 def julia_seq(dim,[{y,x}|tail], array) do
   narray = gen_pixel(dim,{y,x},array)
