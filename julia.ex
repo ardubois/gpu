@@ -86,7 +86,7 @@ end
 end
 
 
-dim =100
+dim =200
 
 mat = Matrex.fill(1,dim*dim*4,0)
 
@@ -106,7 +106,9 @@ Julia.gen_bmp('juliacuda.bmp',dim,image)
 
 indices = for i <- Enum.to_list(0..(dim-1)), j<-Enum.to_list(0..(dim-1)), do: {i,j}
 
-
+prev = System.monotonic_time()
 imageseq = Julia.julia_seq(dim,indices,mat)
+next = System.monotonic_time()
+IO.puts "time gpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
 Julia.gen_bmp('julia.bmp',dim,imageseq)
