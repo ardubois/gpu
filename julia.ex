@@ -11,14 +11,14 @@ defmodule Julia do
     gen_bmp_nif(string,dim,matrix)
   end
 kernel julia(ptr,dim,[:matrex,:int]) do
-  var x int = blockIdx.x;
-  var y int = blockIdx.y;
-  var offset int = x + y * gridDim.x;
+  var x int = blockIdx.x
+  var y int = blockIdx.y
+  var offset int = x + y * gridDim.x
 #####
   var juliaValue int = 2
-  var scale float = 1.5;
-  var jx float = scale * (dim/2 - x)/(dim/2);
-  var jy float = scale * (dim/2 - y)/(dim/2);
+  var scale float = 0.1
+  var jx float = scale * (dim - x)/dim
+  var jy float = scale * (dim/2 - y)/dim
 
   var cr float = -0.8
   var ci float = 0.156
