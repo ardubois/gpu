@@ -63,7 +63,7 @@ defmodule GPU.CudaBackend do
         {str,_ ,_ } ->
             "#{to_string str};"
         number when is_integer(number) or is_float(number) -> to_string(number)
-
+        #string when is_string(string)) -> string #to_string(number)
       end
     end
     defp gen_exp(exp) do
@@ -90,6 +90,7 @@ defmodule GPU.CudaBackend do
           |> Enum.join(", ")
           "#{fun}(#{nargs})"
         number when is_integer(number) or is_float(number) -> to_string(number)
+        string when is_binary(string)  -> "\"#{string}\""
       end
 
     end
