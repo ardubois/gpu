@@ -84,7 +84,7 @@ end
 end
 
 
-dim =400
+dim =100
 
 mat = Matrex.fill(1,dim*dim*4,0)
 
