@@ -26,7 +26,7 @@ kernel julia_kernel(ptr,dim,[:matrex,:int]) do
   var ai float = jy
   for i in range(0,200) do
       var nar float = (ar*ar - ai*ai) + cr
-      var nai = (ai*ar + ar*ai) + ci
+      var nai float = (ai*ar + ar*ai) + ci
       if ((nar * nar)+(nai * nai ) > 1000) do
         juliaValue = 0
         break
