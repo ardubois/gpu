@@ -93,7 +93,7 @@ ref=GPU.create_ref(mat)
 ker=GPU.build('julia_kernel')
 
 prev = System.monotonic_time()
-GPU.spawn(ker,{dim,1,1},{dim,1,1},[ref,dim])
+GPU.spawn(ker,{dim,dim,1},{1,1,1},[ref,dim])
 GPU.synchronize()
 next = System.monotonic_time()
 IO.puts "time gpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
