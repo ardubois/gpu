@@ -55,12 +55,15 @@ defmodule GPU.CudaBackend do
            "#{to_string type} #{to_string var};"
         {:var, _ , [{var,_,[type]}]} ->
            "#{to_string type} #{to_string var};"
-        {fun, _, args} ->
+        {fun, _, args} when is_list(args)->
           nargs=args
           |> Enum.map(&gen_exp/1)
           |> Enum.join(", ")
           "#{fun}(#{nargs})\;"
+        {str,_ ,_ } ->
+            "#{to_string str};"
         number when is_integer(number) or is_float(number) -> to_string(number)
+
       end
     end
     defp gen_exp(exp) do
@@ -73,7 +76,7 @@ defmodule GPU.CudaBackend do
           "#{to_string struct}.#{to_string(field)}"
         {{:., _, [{:__aliases__, _, [struct]}, field]}, _, []} ->
           "#{to_string struct}.#{to_string(field)}"
-        {op, _, args} when op in [:+, :-, :/, :*, :<=, :<, :>, :>=, :&&, :||, :!] ->
+        {op, _, args} when op in [:+, :-, :/, :*, :<=, :<, :>, :>=, :&&, :||, :!,:!=] ->
           case args do
             [a1] ->
               "(#{to_string(op)} #{gen_exp a1})"
