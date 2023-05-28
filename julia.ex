@@ -109,6 +109,6 @@ indices = for i <- Enum.to_list(0..(dim-1)), j<-Enum.to_list(0..(dim-1)), do: {i
 prev = System.monotonic_time()
 imageseq = Julia.julia_seq(dim,indices,mat)
 next = System.monotonic_time()
-IO.puts "time gpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
+IO.puts "time cpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
 Julia.gen_bmp('julia.bmp',dim,imageseq)

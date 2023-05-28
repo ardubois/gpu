@@ -62,4 +62,4 @@ rmat = Matrex.reshape(result,m,k)
 fmat = Matrex.subtract(cmat,rmat)
 
 
-IO.puts "this value must be zero #{Matrex.sum(fmat)}"
+IO.puts "this value must be zero: #{Matrex.sum(fmat)}"
