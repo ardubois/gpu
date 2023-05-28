@@ -1,7 +1,16 @@
-defmodule MyKernel do
+defmodule Julia do
   import GPU
-kernel julia(ptr) do
-  var dim int = 1000
+  @on_load :load_nifs
+  def load_nifs do
+      :erlang.load_nif('./priv/julia_nifs', 0)
+  end
+  def gen_bmp_nif(string,dim,(%Matrex{data: matrix} = a)) do
+      raise "gen_bmp_nif not implemented"
+  end
+  def gen_bmp(string,dim,%Matrex{data: matrix} = a) do
+    gen_bmp_nif(string,dim,matrix)
+  end
+kernel julia(ptr,dim,[:matrex,:int]) do
   var x int = blockIdx.x;
   var y int = blockIdx.y;
   var offset int = x + y * gridDim.x;
@@ -20,12 +29,12 @@ kernel julia(ptr) do
       ai = (ai*ar + ar*ai) + ci
       if ((ar * ar)+(ai * ai ) > 1000) do
         juliaValue = 0
+        break
       end
-      if (juliaValue != 0) do
-        juliaValue = 1
-      end
-
-    end
+  end
+  if (juliaValue != 0) do
+    juliaValue = 1
+  end
 #####
   ptr[offset*4 + 0] = 255 * juliaValue;
   ptr[offset*4 + 1] = 0;
@@ -36,7 +45,20 @@ end
 end
 
 
+dim =400
 
+mat = Matrex.fill(1,dim*dim*4,0)
 
+ref=GPU.create_ref(mat)
 
-kernel=GPU.build('julia')
+ker=GPU.build('julia')
+
+prev = System.monotonic_time()
+GPU.spawn(ker,{dim,1,1},{dim,1,1},[ref,dim])
+GPU.synchronize()
+next = System.monotonic_time()
+IO.puts "time gpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
+
+image = GPU.get_matrex(ref)
+
+Julia.gen_bmp('julia.bmp',dim,image)
