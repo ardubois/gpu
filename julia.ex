@@ -13,9 +13,9 @@ defmodule Julia do
 kernel julia_kernel(ptr,dim,[:matrex,:int]) do
   var x int = blockIdx.x
   var y int = blockIdx.y
-  var offset int = x + y * gridDim.x
+  var offset int = x + y * dim # gridDim.x
 #####
-  var juliaValue int = 2
+  var juliaValue int = 1
   var scale float = 0.1
   var jx float = scale * (dim - x)/dim
   var jy float = scale * (dim - y)/dim
@@ -32,9 +32,9 @@ kernel julia_kernel(ptr,dim,[:matrex,:int]) do
         break
       end
   end
-  if (juliaValue != 0) do
-    juliaValue = 1
-  end
+  #if (juliaValue != 0) do
+  #  juliaValue = 1
+  #end
 #####
   ptr[offset*4 + 0] = 255 * juliaValue;
   ptr[offset*4 + 1] = 0;
