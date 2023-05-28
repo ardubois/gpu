@@ -18,7 +18,7 @@ kernel julia_kernel(ptr,dim,[:matrex,:int]) do
   var juliaValue int = 2
   var scale float = 0.1
   var jx float = scale * (dim - x)/dim
-  var jy float = scale * (dim/2 - y)/dim
+  var jy float = scale * (dim - y)/dim
 
   var cr float = -0.8
   var ci float = 0.156
