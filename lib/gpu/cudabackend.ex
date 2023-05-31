@@ -34,7 +34,7 @@ defmodule GPU.CudaBackend do
    #    gen_atrib_last code
    # else
       case code do
-       {:for,_,[param,[body]]} ->
+        {:for,_,[param,[body]]} ->
           header = gen_header_for(param)
           body = gen_body(body)
           header <> "{\n" <> body <> "\n}\n"
@@ -44,6 +44,21 @@ defmodule GPU.CudaBackend do
           "\t#{a} = #{e}\;"
         {:if, _, if_com} ->
             genIf(if_com)
+        {:do_while, _, [[doblock]]} ->
+            "do{\n" <> gen_body(doblock)
+        {:do_while_test, _, [exp]} ->
+          "\nwhile("<> (gen_exp exp) <>  ");"
+        {:while, _, [bexp,[body]]} ->
+          "while(" <> (gen_exp bexp) <> "){\n" <> (gen_body body) <> "\n}"
+        # CRIAÇÃO DE NOVOS VETORES
+        {{:., _, [Access, :get]}, _, [arg1,arg2]} ->
+            name = gen_exp arg1
+            index = gen_exp arg2
+            "float #{name}[#{index}];"
+        {:__shared__,_ , [{{:., _, [Access, :get]}, _, [arg1,arg2]}]} ->
+          name = gen_exp arg1
+          index = gen_exp arg2
+          "__shared__ float #{name}[#{index}];"
         {:var, _ , [{var,_,[{:=, _, [{type,_,nil}, exp]}]}]} ->
           #IO.puts "aqui"
           gexp = gen_exp exp
