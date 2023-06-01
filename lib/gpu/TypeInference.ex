@@ -83,7 +83,7 @@ defmodule GPU.TypeInference do
                   |> Map.put(var,type_exp)
                   |> set_type_exp(type_exp,exp)
                 else
-                  map
+                  infer_type_fun(map,exp) #  map
                 end
               {map,var_type} ->
                 set_type_exp(map,var_type,exp)
@@ -105,6 +105,7 @@ defmodule GPU.TypeInference do
                 map
                 |> Map.put(var,type)
           {_fun, _, args} when is_list(args)->
+            Enum.reduce(args,map, fn v,acc -> infer_type_exp(acc,v) end)
             #IO.puts "ya"
             map
           number when is_integer(number) or is_float(number) -> raise "Error: number is a command"
@@ -235,7 +236,9 @@ defp set_type_exp(map,type,exp) do
              map
            end
         end
-      {fun, _, args} ->
+      {_fun, _, args} when is_list(args)->
+        Enum.reduce(args,map, fn v,acc -> infer_type_exp(acc,v) end)
+      {fun, _, noargs} ->
         map
       float when  is_float(float) ->
         if(type == :float) do
@@ -257,6 +260,26 @@ defp set_type_exp(map,type,exp) do
         end
    end
   end
+#  defp infer_type_exp(map,exp) do
+ #   type = find_type_exp(map,exp)
+  #  set_type_exp(map,type,exp)
+  #end
+  defp infer_type_fun(map,exp) do
+      case exp do
+        {fun, _, args} when is_list(args)->
+          Enum.reduce(args,map, fn v,acc -> infer_type_exp(acc,v) end)
+        _ -> map
+       end
+  end
+  defp infer_type_exp(map,exp) do
+    type = find_type_exp(map,exp)
+    if (type != :none) do
+      set_type_exp(map,type,exp)
+    else
+      map
+    end
+end
+
   defp find_type_exp(map,exp) do
       case exp do
          {{:., _, [Access, :get]}, _, [arg1,arg2]} ->
