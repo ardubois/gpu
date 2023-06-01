@@ -15,8 +15,8 @@ defmodule Julia do
     var y int = threadIdx.y + blockIdx.y * blockDim.y;
     var offset int = x + y * blockDim.x * gridDim.x;
 
-    var fx float = x - dim/2;
-    var fy float  = y - dim/2;
+    var fx float = 0.5 *  x - dim/15;
+    var fy float  = 0.5 *  y - dim/15;
     var d float = sqrtf( fx * fx + fy * fy );
     var grey float = floor(128.0 + 127.0 *cos(d/10.0 - ticks/7.0) /(d/10.0 + 1.0));
     ptr[offset*4 + 0] = grey;
