@@ -58,7 +58,7 @@ n_blocks = floor ((dim+(n_threads-1))/n_threads)
 
 
 prev = System.monotonic_time()
-GPU.spawn(ker,{n_blocks,n_threads,1},{n_blocks,n_threads,1},[ref,dim,10])
+GPU.spawn(ker,{dim,dim,1},{1,1,1},[ref,dim,10])
 GPU.synchronize()
 next = System.monotonic_time()
 IO.puts "time gpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
