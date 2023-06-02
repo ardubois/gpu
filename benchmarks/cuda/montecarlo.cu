@@ -16,9 +16,9 @@ __global__ void gpu_monte_carlo(float *estimate, float *x, float*y, int points_p
 
 int main ()
 {
-   int blocks = 100;
-   int threads = 128;
-   int points_per_thread = 5;
+   int blocks = 10;
+   int threads = 10;
+   int points_per_thread = 2;
    int size = blocks*threads*points_per_thread;
    cudaError_t mc_error;
 
@@ -26,9 +26,9 @@ int main ()
    float x[size];
    float y[size];
    float estimate[blocks*threads];
-   float dev_estimate[blocks*threads];
+   
 
-   float *dev_x, *dev_y;
+   float *dev_x, *dev_y, *dev_estimate;
 
    for (int i = 0; i< size; i++)
     {
@@ -36,34 +36,38 @@ int main ()
       y[i]= rand() / (float) RAND_MAX;
     }
 
+    ////////
     cudaMalloc( (void**)&dev_x, size*sizeof(float) );
     mc_error = cudaGetLastError();
-    if(mc_error != cudaSuccess) printf("Error: %s\n", cudaGetErrorString(mc_error));
+    if(mc_error != cudaSuccess) printf("Error 1: %s\n", cudaGetErrorString(mc_error));
+    ////////
     cudaMalloc( (void**)&dev_y, size*sizeof(float) );
     mc_error = cudaGetLastError();
-    if(mc_error != cudaSuccess) printf("Error: %s\n", cudaGetErrorString(mc_error));
+    if(mc_error != cudaSuccess) printf("Error 2: %s\n", cudaGetErrorString(mc_error));
+    /////////////////////
     cudaMalloc( (void**)&dev_estimate, blocks*threads*sizeof(float) );
     mc_error = cudaGetLastError();
-    if(mc_error != cudaSuccess) printf("Error: %s\n", cudaGetErrorString(mc_error));
+    if(mc_error != cudaSuccess) printf("Error 3: %s\n", cudaGetErrorString(mc_error));
+    //////////////////////
 
     cudaMemcpy( dev_x, x, size*sizeof(float), cudaMemcpyHostToDevice );
     mc_error = cudaGetLastError();
-    if(mc_error != cudaSuccess) printf("Error: %s\n", cudaGetErrorString(mc_error));
+    if(mc_error != cudaSuccess) printf("Error 4: %s\n", cudaGetErrorString(mc_error));
     cudaMemcpy( dev_y, y, size*sizeof(float), cudaMemcpyHostToDevice );
     mc_error = cudaGetLastError();
-    if(mc_error != cudaSuccess) printf("Error: %s\n", cudaGetErrorString(mc_error));
+    if(mc_error != cudaSuccess) printf("Error 5: %s\n", cudaGetErrorString(mc_error));
 
     gpu_monte_carlo<<<blocks, threads>>>(dev_estimate, dev_x, dev_y, points_per_thread);
     mc_error = cudaGetLastError();
-    if(mc_error != cudaSuccess) printf("Error: %s\n", cudaGetErrorString(mc_error));
+    if(mc_error != cudaSuccess) printf("Error 6: %s\n", cudaGetErrorString(mc_error));
 
 	 cudaMemcpy(estimate, dev_estimate, blocks * threads * sizeof(float), cudaMemcpyDeviceToHost); // return results 
     mc_error = cudaGetLastError();
-    if(mc_error != cudaSuccess) printf("Error: %s\n", cudaGetErrorString(mc_error));
-    
+    if(mc_error != cudaSuccess) printf("Error 7: %s\n", cudaGetErrorString(mc_error));
+
 	float pi_gpu=0;
 	for(int i = 0; i < blocks * threads; i++) {
-		pi_gpu += dev_estimate[i];
+		pi_gpu += estimate[i];
 	}
 
 	pi_gpu /= (blocks * threads);
