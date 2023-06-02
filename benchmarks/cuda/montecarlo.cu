@@ -53,7 +53,12 @@ int main ()
 
 	pi_gpu /= (blocks * threads);
 	printf("Pi estimate dev: %f",pi_gpu);
-
-
+  
+  cudaFree(dev_x);
+  cudaFree(dev_y);
+  cudaFree(dev_estimate);
+//free(x);
+  //#free(y);
+  //free(estimate);
 }
 
