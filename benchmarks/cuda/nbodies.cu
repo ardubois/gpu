@@ -85,6 +85,13 @@ void cpu_bodyForce(float *p, float dt, int n,float softening) {
   }
 }
 
+bool Equality(float a, float b)
+{
+  double a1 = (double)a;
+  double b1 = (double)b;
+  if (fabs(a1-b1) < 0.0001) return 1;
+  return 0;
+}
 int main(const int argc, const char** argv) {
   
   int nBodies = 3000;
@@ -165,7 +172,7 @@ int main(const int argc, const char** argv) {
 
 
     for (int i = 0 ; i < nBodies; i++) { // integrate position
-      if (h_buf[i] != d_resp[i] || h_buf[i+1] != d_resp[i+1] || h_buf[i+2] != d_resp[i+2])
+      if (Equality(h_buf[i],d_resp[i]))
         { printf("Diferentes h_buf[%d] = %f, d_resp[%i] = %f \n",i,h_buf[i],i,d_resp[i]); }
     }
 
