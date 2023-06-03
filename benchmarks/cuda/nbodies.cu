@@ -42,9 +42,9 @@ void gpu_bodyForce(float *p, float dt, int n, float softening) {
     float Fx = 0.0f; float Fy = 0.0f; float Fz = 0.0f;
 
     for (int j = 0; j < n; j++) {
-      float dx = p[j] - p[i];
-      float dy = p[j+1] - p[i+1];
-      float dz = p[j+2] - p[i+2];
+      float dx = p[6*j] - p[6*i];
+      float dy = p[6*j+1] - p[6*i+1];
+      float dz = p[6*j+2] - p[6*i+2];
       float distSqr = dx*dx + dy*dy + dz*dz + softening;
       float invDist = rsqrtf(distSqr);
       float invDist3 = invDist * invDist * invDist;
@@ -54,9 +54,9 @@ void gpu_bodyForce(float *p, float dt, int n, float softening) {
       Fz += dz * invDist3;
     }
 
-    p[i+3]+= dt*Fx; 
-    p[i+4] += dt*Fy; 
-    p[i+5] += dt*Fz;
+    p[6*i+3]+= dt*Fx; 
+    p[6*i+4] += dt*Fy; 
+    p[6*i+5] += dt*Fz;
   }
 }
 
@@ -67,9 +67,9 @@ void cpu_bodyForce(float *p, float dt, int n,float softening) {
     float Fx = 0.0f; float Fy = 0.0f; float Fz = 0.0f;
 
     for (int j = 0; j < n; j++) {
-      float dx = p[j] - p[i];
-      float dy = p[j+1] - p[i+1];
-      float dz = p[j+2] - p[i+2];
+      float dx = p[6*j] - p[6*i];
+      float dy = p[6*j+1] - p[6*i+1];
+      float dz = p[6*j+2] - p[6*i+2];
       float distSqr = dx*dx + dy*dy + dz*dz + softening;
       float invDist = rsqrtf(distSqr);
       float invDist3 = invDist * invDist * invDist;
@@ -79,15 +79,15 @@ void cpu_bodyForce(float *p, float dt, int n,float softening) {
       Fz += dz * invDist3;
     }
 
-    p[i+3]+= dt*Fx; 
-    p[i+4] += dt*Fy; 
-    p[i+5] += dt*Fz;
+    p[6*i+3]+= dt*Fx; 
+    p[6*i+4] += dt*Fy; 
+    p[6*i+5] += dt*Fz;
   }
 }
 
 int main(const int argc, const char** argv) {
   
-  int nBodies = 30000;
+  int nBodies = 3000;
   int block_size =  128;
   float softening = 0.000000001;
   cudaError_t nb_error;
@@ -166,7 +166,7 @@ int main(const int argc, const char** argv) {
 
     for (int i = 0 ; i < nBodies; i++) { // integrate position
       if (h_buf[i] != d_resp[i] || h_buf[i+1] != d_resp[i+1] || h_buf[i+2] != d_resp[i+2])
-        { printf("Diferente\n"); }
+        { printf("Diferentes h_buf[%d] = %f, d_resp[%i] = %f \n",i,h_buf[i],i,d_resp[i]); }
     }
 
     free(h_buf);
