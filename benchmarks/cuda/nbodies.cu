@@ -65,9 +65,9 @@ void gpu_integrate(float *p, float dt, int n) {
   int i = blockDim.x * blockIdx.x + threadIdx.x;
   if (i < n) {
 
-      p[i] += p[i+3]*dt;
-      p[i+1] += p[i+4]*dt;
-      p[i+2] += p[i+5]*dt;
+      p[6*i] += p[6*i+3]*dt;
+      p[6*i+1] += p[6*i+4]*dt;
+      p[6*i+2] += p[6*i+5]*dt;
  
   }
 }
@@ -107,7 +107,7 @@ bool Equality(float a, float b)
 }
 int main(const int argc, const char** argv) {
   
-  int nBodies = 3000;
+  int nBodies = 30000;
   int block_size =  128;
   float softening = 0.000000001;
   cudaError_t nb_error;
@@ -175,9 +175,9 @@ int main(const int argc, const char** argv) {
     cpu_bodyForce(h_buf,dt,nBodies,softening);
     float *p = h_buf;
     for (int i = 0 ; i < nBodies; i++) { // integrate position
-      p[i] += p[i+3]*dt;
-      p[i+1] += p[i+4]*dt;
-      p[i+2] += p[i+5]*dt;
+      p[6*i] += p[6*i+3]*dt;
+      p[6*i+1] += p[6*i+4]*dt;
+      p[6*i+2] += p[6*i+5]*dt;
     }
   
     end = clock();
