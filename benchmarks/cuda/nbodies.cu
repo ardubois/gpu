@@ -172,7 +172,7 @@ int main(const int argc, const char** argv) {
 
 
     for (int i = 0 ; i < nBodies; i++) { // integrate position
-      if (Equality(h_buf[i],d_resp[i]))
+      if (!Equality(h_buf[i],d_resp[i]))
         { printf("Diferentes h_buf[%d] = %f, d_resp[%i] = %f \n",i,h_buf[i],i,d_resp[i]); }
     }
 
