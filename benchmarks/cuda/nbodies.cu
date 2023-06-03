@@ -60,6 +60,19 @@ void gpu_bodyForce(float *p, float dt, int n, float softening) {
   }
 }
 
+__global__
+void gpu_integrate(float *p, float dt, int n) {
+  int i = blockDim.x * blockIdx.x + threadIdx.x;
+  if (i < n) {
+
+      p[i] += p[i+3]*dt;
+      p[i+1] += p[i+4]*dt;
+      p[i+2] += p[i+5]*dt;
+ 
+  }
+}
+
+
 void cpu_bodyForce(float *p, float dt, int n,float softening) {
   for(int i = 0; i<n; i++)
   {
@@ -136,7 +149,15 @@ int main(const int argc, const char** argv) {
     if(nb_error != cudaSuccess) printf("Error 3: %s\n", cudaGetErrorString(nb_error));
   //////// 
  
+    cudaDeviceSynchronize();
+    nb_error = cudaGetLastError();
+    if(nb_error != cudaSuccess) printf("Error 3: %s\n", cudaGetErrorString(nb_error));
+  ////////
 
+   gpu_integrate<<<nBlocks, block_size>>>(d_buf, dt, nBodies); // compute interbody forces
+    nb_error = cudaGetLastError();
+    if(nb_error != cudaSuccess) printf("Error 3: %s\n", cudaGetErrorString(nb_error));
+   
 
    /////////////////////////////
    cudaMemcpy(d_resp, d_buf, bytes, cudaMemcpyDeviceToHost);
@@ -144,13 +165,7 @@ int main(const int argc, const char** argv) {
     if(nb_error != cudaSuccess) printf("Error 4: %s\n", cudaGetErrorString(nb_error));
   //////// 
  
-    float *p = d_resp;
-    for (int i = 0 ; i < nBodies; i++) { // integrate position
-      p[i] += p[i+3]*dt;
-      p[i+1] += p[i+4]*dt;
-      p[i+2] += p[i+5]*dt;
-    }
-
+    
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
@@ -158,7 +173,7 @@ int main(const int argc, const char** argv) {
 
     begin = clock();
     cpu_bodyForce(h_buf,dt,nBodies,softening);
-    p = h_buf;
+    float *p = h_buf;
     for (int i = 0 ; i < nBodies; i++) { // integrate position
       p[i] += p[i+3]*dt;
       p[i+1] += p[i+4]*dt;
