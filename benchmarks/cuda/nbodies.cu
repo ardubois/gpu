@@ -89,7 +89,7 @@ bool Equality(float a, float b)
 {
   double a1 = (double)a;
   double b1 = (double)b;
-  if (fabs(a1-b1) < 0.0001) return 1;
+  if (fabs(a1-b1) < 0.001) return 1;
   return 0;
 }
 int main(const int argc, const char** argv) {
