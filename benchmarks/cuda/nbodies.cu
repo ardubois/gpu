@@ -162,6 +162,13 @@ int main(const int argc, const char** argv) {
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
     printf("CPU elapsed time is %f seconds\n", time_spent);
+
+
+    for (int i = 0 ; i < nBodies; i++) { // integrate position
+      if (h_buf[i] != d_resp[i] || h_buf[i+1] != d_resp[i+1] || h_buf[i+2] != d_resp[i+2])
+        { printf("Diferente\n"); }
+    }
+
     free(h_buf);
     free(d_resp);
     cudaFree(d_buf);
