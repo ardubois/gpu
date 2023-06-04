@@ -85,12 +85,17 @@ d_buf =GPU.create_ref(h_buf)
 prev = System.monotonic_time()
 GPU.spawn(ker,{nBlocks,block_size,1},{1,1,1},[d_buf,dt,nBodies,softening])
 GPU.synchronize()
+gpu_resp = GPU.get_matrex(d_buf)
 next = System.monotonic_time()
 IO.puts "time gpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
+
+IO.puts gpu_resp
 
 prev = System.monotonic_time()
 cpu_resp = NBodies.nbodies(nBodies-1,h_buf,dt,softening,nBodies-1)
 next = System.monotonic_time()
 IO.puts "time cpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
+
+IO.puts cpu_resp
 
 IO.inspect cpu_resp
