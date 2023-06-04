@@ -25,24 +25,24 @@ defmodule NBodies do
 
   end
 
-  def nbodies(0,p,_dt,_softening,_n) do
+  def nbodies(-1,p,_dt,_softening,_n) do
     p
   end
   def nbodies(i,p,dt,softening,n) do
     {fx,fy,fz} = calc_nbodies(n,i,p,softening,0.0,0.0,0.0)
-    Matrex.set(p,1,6*i+3,Matrex.at(p,1,6*i+3)+ dt*fx);
-    Matrex.set(p,1,6*i+4,Matrex.at(p,1,6*i+4) + dt*fy);
-    Matrex.set(p,1,6*i+5,Matrex.at(p,1,6*i+5) + dt*fz);
+    Matrex.set(p,1,6*i+4,Matrex.at(p,1,6*i+4)+ dt*fx);
+    Matrex.set(p,1,6*i+5,Matrex.at(p,1,6*i+5) + dt*fy);
+    Matrex.set(p,1,6*i+6,Matrex.at(p,1,6*i+6) + dt*fz);
     nbodies(i-1,p,dt,softening,n)
   end
 
-def calc_nbodies(0,_i,_p,_softening,fx,fy,fz) do
+def calc_nbodies(-1,_i,_p,_softening,fx,fy,fz) do
   {fx,fy,fz}
 end
 def calc_nbodies(j,i,p,softening,fx,fy,fz) do
-    dx = Matrex.at(p,1,6*j) - Matrex.at(p,1,6*i);
-    dy = Matrex.at(p,1,6*j+1) - Matrex.at(p,1,6*i+1);
-    dz = Matrex.at(p,1,6*j+2) - Matrex.at(p,1,6*i+2);
+    dx = Matrex.at(p,1,6*(j+1)) - Matrex.at(p,1,6*(i+1));
+    dy = Matrex.at(p,1,6*(j+2)) - Matrex.at(p,1,6*(i+2));
+    dz = Matrex.at(p,1,6*(j+3)) - Matrex.at(p,1,6*(i+3));
     distSqr = dx*dx + dy*dy + dz*dz + softening;
     invDist = 1/:math.sqrt(distSqr);
     invDist3 = invDist * invDist * invDist;
@@ -104,7 +104,7 @@ IO.puts "time gpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
 IO.inspect gpu_resp
 
 prev = System.monotonic_time()
-cpu_resp = NBodies.nbodies(nBodies-1,h_buf,dt,softening,nBodies-1)
+cpu_resp = NBodies.nbodies(nBodies-3,h_buf,dt,softening,nBodies-3)
 next = System.monotonic_time()
 IO.puts "time cpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
