@@ -7,12 +7,12 @@ defmodule NBodies do
       var fy float= 0.0
       var fz float = 0.0
       for j in range(0,n) do
-        var float dx = p[6*j] - p[6*i];
-        var float dy = p[6*j+1] - p[6*i+1];
-        var float dz = p[6*j+2] - p[6*i+2];
-        var float distSqr  = dx*dx + dy*dy + dz*dz + softening;
-        var float invDist = rsqrtf(distSqr);
-        var float invDist3  = invDist * invDist * invDist;
+        var dx float= p[6*j] - p[6*i];
+        var dy float= p[6*j+1] - p[6*i+1];
+        var dz float= p[6*j+2] - p[6*i+2];
+        var distSqr  float = dx*dx + dy*dy + dz*dz + softening;
+        var invDist float = rsqrtf(distSqr);
+        var invDist3  float = invDist * invDist * invDist;
 
         fx = fx + dx * invDist3;
         fy = fy + dy * invDist3;
@@ -74,11 +74,13 @@ size_matrex = size_body * nBodies
 
 h_buf = Matrex.random(1,size_matrex)
 
-d_buf =GPU.create_ref(h_buf)
+
 
 
 
 ker=GPU.build('gpu_nBodies')
+
+d_buf =GPU.create_ref(h_buf)
 
 prev = System.monotonic_time()
 GPU.spawn(ker,{nBlocks,block_size,1},{1,1,1},[d_buf,dt,nBodies,softening])
