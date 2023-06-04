@@ -62,12 +62,14 @@ kernel gpu_integrate(p, dt, n,[:matrex,:float,:int]) do
     p[6*i+2] = p[6*i+2] + p[6*i+5]*dt;
   end
 end
-
+def cpu_integrate(-1,p,dt) do
+  p
+end
 def cpu_integrate(i,p, dt) do
       p=Matrex.set(p,1,6*i+1,Matrex.at(p,1,6*i+1) + Matrex.at(p,1,6*i+4)*dt)
       p=Matrex.set(p,1,6*i+2,Matrex.at(p,1,6*i+2) + Matrex.at(p,1,6*i+5)*dt)
       p=Matrex.set(p,1,6*i+3,Matrex.at(p,1,6*i+3) + Matrex.at(p,1,6*i+6)*dt)
-      cpu_integrate(i-2,p,dt)
+      cpu_integrate(i-1,p,dt)
 end
 def equality(a, b) do
   if(abs(a-b) < 0.001) do
@@ -107,20 +109,20 @@ h_buf = Matrex.random(1,size_matrex)
 
 
 
-ker1=GPU.build('gpu_nBodies')
-ker2=GPU.build('gpu_integrate')
+#ker1=GPU.build('gpu_nBodies')
+#ker2=GPU.build('gpu_integrate')
 
-d_buf =GPU.create_ref(h_buf)
+#d_buf =GPU.create_ref(h_buf)
 
 prev = System.monotonic_time()
-GPU.spawn(ker1,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies,softening])
-GPU.synchronize()
-GPU.spawn(ker2,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies])
-gpu_resp = GPU.get_matrex(d_buf)
+#GPU.spawn(ker1,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies,softening])
+#GPU.synchronize()
+#GPU.spawn(ker2,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies])
+#gpu_resp = GPU.get_matrex(d_buf)
 next = System.monotonic_time()
-IO.puts "time gpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
+#IO.puts "time gpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
-IO.inspect gpu_resp
+#IO.inspect gpu_resp
 
 prev = System.monotonic_time()
 cpu_resp = NBodies.nbodies(nBodies-1,h_buf,dt,softening,nBodies-1)
@@ -130,4 +132,4 @@ IO.puts "time cpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
 IO.inspect cpu_resp
 
-NBodies.check_equality(nBodies,cpu_resp,gpu_resp)
+#NBodies.check_equality(nBodies,cpu_resp,gpu_resp)
