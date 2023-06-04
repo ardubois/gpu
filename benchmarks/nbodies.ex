@@ -29,11 +29,12 @@ defmodule NBodies do
     p
   end
   def nbodies(i,p,dt,softening,n) do
+    nbodies(i-1,p,dt,softening,n)
     {fx,fy,fz} = calc_nbodies(n,i,p,softening,0.0,0.0,0.0)
     Matrex.set(p,1,6*i+4,Matrex.at(p,1,6*i+4)+ dt*fx);
     Matrex.set(p,1,6*i+5,Matrex.at(p,1,6*i+5) + dt*fy);
     Matrex.set(p,1,6*i+6,Matrex.at(p,1,6*i+6) + dt*fz);
-    nbodies(i-1,p,dt,softening,n)
+
   end
 
 def calc_nbodies(-1,_i,_p,_softening,fx,fy,fz) do
