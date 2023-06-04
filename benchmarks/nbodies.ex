@@ -124,6 +124,7 @@ IO.inspect gpu_resp
 
 prev = System.monotonic_time()
 cpu_resp = NBodies.nbodies(nBodies-1,h_buf,dt,softening,nBodies-1)
+cpu_resp = NBodies.cpu_integrate(nBodies-1,cpu_resp,dt)
 next = System.monotonic_time()
 IO.puts "time cpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
