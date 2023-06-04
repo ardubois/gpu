@@ -64,9 +64,9 @@ kernel gpu_integrate(p, dt, n,[:matrex,:float,:int]) do
 end
 
 def cpu_integrate(i,p, dt) do
-      p=Matrex.set(p,1,6*i+1,Matrex.get(p,1,6*i+1) + Matrex.get(p,1,6*i+4)*dt)
-      p=Matrex.set(p,1,6*i+2,Magrex.get(p,1,6*i+2) + Matrex.get(p,1,6*i+5)*dt)
-      p=Matrex.set(p,1,6*i+3,Matrex.get(p,1,6*i+3) + Matrex.get(p,1,6*i+6)*dt)
+      p=Matrex.set(p,1,6*i+1,Matrex.at(p,1,6*i+1) + Matrex.at(p,1,6*i+4)*dt)
+      p=Matrex.set(p,1,6*i+2,Matrex.at(p,1,6*i+2) + Matrex.at(p,1,6*i+5)*dt)
+      p=Matrex.set(p,1,6*i+3,Matrex.at(p,1,6*i+3) + Matrex.at(p,1,6*i+6)*dt)
       cpu_integrate(i-2,p,dt)
 end
 def equality(a, b) do
