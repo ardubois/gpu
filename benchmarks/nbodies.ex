@@ -70,7 +70,7 @@ def check_equality(n,cpu,gpu) do
   if(equality(gpu1,cpu1)) do
     check_equality(n-1,cpu,gpu)
   else
-    IO.puts "cpu = #{cpu1}, gpu = #{gpu1}"
+    IO.puts "#{n}: cpu = #{cpu1}, gpu = #{gpu1}"
     check_equality(n-1,cpu,gpu)
   end
 end
@@ -97,7 +97,7 @@ ker=GPU.build('gpu_nBodies')
 d_buf =GPU.create_ref(h_buf)
 
 prev = System.monotonic_time()
-GPU.spawn(ker,{nBlocks,block_size,1},{1,1,1},[d_buf,dt,nBodies,softening])
+GPU.spawn(ker,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies,softening])
 GPU.synchronize()
 gpu_resp = GPU.get_matrex(d_buf)
 next = System.monotonic_time()
