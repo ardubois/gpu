@@ -11,7 +11,7 @@ defmodule NBodies do
         var dy float= p[6*j+1] - p[6*i+1];
         var dz float= p[6*j+2] - p[6*i+2];
         var distSqr  float = dx*dx + dy*dy + dz*dz + softening;
-        var invDist float = rsqrtf(distSqr);
+        var invDist float = 1/sqrt(distSqr);
         var invDist3  float = invDist * invDist * invDist;
 
         fx = fx + dx * invDist3;
@@ -63,8 +63,8 @@ def check_equality(0,cpu,gpu) do
   :ok
 end
 def check_equality(n,cpu,gpu) do
-  gpu1 =Matrex.get(gpu,1,n)
-  cpu1 = Matrex.get(cpu,1,n)
+  gpu1 =Matrex.at(gpu,1,n)
+  cpu1 = Matrex.at(cpu,1,n)
   if(equality(gpu1,cpu1)) do
     check_equality(n-1,cpu,gpu)
   else
