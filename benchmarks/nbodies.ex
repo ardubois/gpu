@@ -54,6 +54,21 @@ def calc_nbodies(j,i,p,softening,fx,fy,fz) do
     fz = fz + dz * invDist3;
     calc_nbodies(j-1,i,p,softening,fx,fy,fz)
 end
+kernel gpu_integrate(p, dt, n,[:matrex,:float,:int]) do
+  var i int  = blockDim.x * blockIdx.x + threadIdx.x;
+  if (i < n) do
+    p[6*i] = p[6*i] + p[6*i+3]*dt;
+    p[6*i+1] = p[6*i+1] + p[6*i+4]*dt;
+    p[6*i+2] = p[6*i+2] + p[6*i+5]*dt;
+  end
+end
+
+def cpu_integrate(i,p, dt) do
+      p=Matrex.set(p,1,6*i+1,Matrex.get(p,1,6*i+1) + Matrex.get(p,1,6*i+4)*dt)
+      p=Matrex.set(p,1,6*i+2,Magrex.get(p,1,6*i+2) + Matrex.get(p,1,6*i+5)*dt)
+      p=Matrex.set(p,1,6*i+3,Matrex.get(p,1,6*i+3) + Matrex.get(p,1,6*i+6)*dt)
+      cpu_integrate(i-2,p,dt)
+end
 def equality(a, b) do
   if(abs(a-b) < 0.001) do
     true
@@ -92,13 +107,15 @@ h_buf = Matrex.random(1,size_matrex)
 
 
 
-ker=GPU.build('gpu_nBodies')
+ker1=GPU.build('gpu_nBodies')
+ker2=GPU.build('gpu_integrate')
 
 d_buf =GPU.create_ref(h_buf)
 
 prev = System.monotonic_time()
-GPU.spawn(ker,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies,softening])
+GPU.spawn(ker1,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies,softening])
 GPU.synchronize()
+GPU.spawn(ker2,{nBlocks,1,1},{block_size,1,1},[d_buf,dt,nBodies])
 gpu_resp = GPU.get_matrex(d_buf)
 next = System.monotonic_time()
 IO.puts "time gpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
