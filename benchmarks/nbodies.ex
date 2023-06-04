@@ -59,12 +59,24 @@ def equality(a, b) do
     false
   end
 end
-
+def check_equality(0,cpu,gpu) do
+  :ok
+end
+def check_equality(n,cpu,gpu) do
+  gpu1 =Matrex.get(gpu,1,n)
+  cpu1 = Matrex.get(cpu,1,n)
+  if(equality(gpu1,cpu1)) do
+    check_equality(n-1,cpu,gpu)
+  else
+    IO.puts "cpu = #{cpu1}, gpu = #{gpu1}"
+    check_equality(n-1,cpu,gpu)
+  end
+end
 end
 
 nBodies = 3000;
 block_size =  128;
-nBlocks = (nBodies + block_size - 1) / block_size;
+nBlocks = floor ((nBodies + block_size - 1) / block_size)
 softening = 0.000000001;
 dt = 0.01; # time step
 size_body = 6
@@ -89,13 +101,13 @@ gpu_resp = GPU.get_matrex(d_buf)
 next = System.monotonic_time()
 IO.puts "time gpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
-IO.puts gpu_resp
+IO.inspect gpu_resp
 
 prev = System.monotonic_time()
 cpu_resp = NBodies.nbodies(nBodies-1,h_buf,dt,softening,nBodies-1)
 next = System.monotonic_time()
 IO.puts "time cpu #{System.convert_time_unit(next-prev,:native,:millisecond)}"
 
-IO.puts cpu_resp
-
 IO.inspect cpu_resp
+
+NBodies.check_equality(nBodies,cpu_resp,gpu_resp)
