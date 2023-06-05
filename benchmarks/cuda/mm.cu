@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 __global__ void gpu_mm(float *a,float *b, float *c, int m, int n, int k)
 { 
     int row = blockIdx.y * blockDim.y + threadIdx.y; 
@@ -47,6 +48,7 @@ int main(int argc, char const *argv[])
     int m = 1000;
     int block_size = 16;
     cudaError_t j_error;
+    clock_t begindt1, enddt1, begindt2, enddt2, begink,endk,begincpu, endcpu;
 
     float *a = (float*) malloc(m*m*sizeof(float));
     float *b = (float*) malloc(m*m*sizeof(float));
@@ -67,7 +69,7 @@ int main(int argc, char const *argv[])
 
     float *d_a, *d_b, *d_c;
 
-
+    
     cudaMalloc((void **) &d_a, sizeof(float)*m*m);
      j_error = cudaGetLastError();
     if(j_error != cudaSuccess) printf("Error 1: %s\n", cudaGetErrorString(j_error));
@@ -77,7 +79,9 @@ int main(int argc, char const *argv[])
     cudaMalloc((void **) &d_c, sizeof(float)*m*m);
      j_error = cudaGetLastError();
     if(j_error != cudaSuccess) printf("Error 3: %s\n", cudaGetErrorString(j_error));
+   
 
+    begindt1 = clock();
     // copy matrix A and B from host to device memory
     cudaMemcpy(d_a, a, sizeof(float)*m*m, cudaMemcpyHostToDevice);
      j_error = cudaGetLastError();
@@ -85,23 +89,48 @@ int main(int argc, char const *argv[])
     cudaMemcpy(d_b, b, sizeof(float)*m*m, cudaMemcpyHostToDevice);
      j_error = cudaGetLastError();
     if(j_error != cudaSuccess) printf("Error 5: %s\n", cudaGetErrorString(j_error));
+    enddt1 = clock();
 
     int grid_rows = (m + block_size - 1) / block_size;
     int grid_cols = (m + block_size - 1) / block_size;
     dim3 dimGrid(grid_cols, grid_rows);
     dim3 dimBlock(block_size, block_size);
    
-    gpu_mm<<<dimGrid, dimBlock>>>(d_a, d_b, d_c, m,m,m);    
-     j_error = cudaGetLastError();
+    begink = clock();
+    gpu_mm<<<dimGrid, dimBlock>>>(d_a, d_b, d_c, m,m,m);  
+    endk = clock();
+
+    j_error = cudaGetLastError();
     if(j_error != cudaSuccess) printf("Error 6: %s\n", cudaGetErrorString(j_error));
 
+    begindt2 = clock();
     cudaMemcpy(c, d_c, sizeof(float)*m*m, cudaMemcpyDeviceToHost);
+    enddt2 = clock();
+
     j_error = cudaGetLastError();
     if(j_error != cudaSuccess) printf("Error 7: %s\n", cudaGetErrorString(j_error));
 
+    begincpu = clock();
     cpu_mm(a,b,cpu_result,m,m,m);
+    endcpu = clock();
 
     checkElementsAre(c,cpu_result,m*m);
+
+    double time_dt1 = (double)(enddt1 - begindt1) / CLOCKS_PER_SEC;
+
+    printf("Time transfer1: %f seconds\n", time_dt1);
+
+    double time_dt2 = (double)(enddt2 - begindt2) / CLOCKS_PER_SEC;
+
+    printf("Time transfer 2: %f seconds\n", time_dt2);
+
+    double time_k = (double)(endk - begink) / CLOCKS_PER_SEC;
+
+    printf("Time kernel: %f seconds\n", time_k);
+
+    double time_cpu = (double)(endcpu - begincpu) / CLOCKS_PER_SEC;
+
+    printf("Time cpu: %f seconds\n", time_cpu);
 
     free(a);
     free(b);
