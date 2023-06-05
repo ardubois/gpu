@@ -46,6 +46,7 @@ int main(int argc, char const *argv[])
 {
     int m = 1000;
     int block_size = 128;
+    cudaError_t j_error;
 
     float *a = (float*) malloc(m*m*sizeof(float));
     float *b = (float*) malloc(m*m*sizeof(float));
@@ -68,12 +69,22 @@ int main(int argc, char const *argv[])
 
 
     cudaMalloc((void **) &d_a, sizeof(float)*m*m);
+     j_error = cudaGetLastError();
+    if(j_error != cudaSuccess) printf("Error 1: %s\n", cudaGetErrorString(j_error));
     cudaMalloc((void **) &d_b, sizeof(float)*m*m);
+     j_error = cudaGetLastError();
+    if(j_error != cudaSuccess) printf("Error 2: %s\n", cudaGetErrorString(j_error));
     cudaMalloc((void **) &d_c, sizeof(float)*m*m);
+     j_error = cudaGetLastError();
+    if(j_error != cudaSuccess) printf("Error 3: %s\n", cudaGetErrorString(j_error));
 
     // copy matrix A and B from host to device memory
     cudaMemcpy(d_a, a, sizeof(float)*m*m, cudaMemcpyHostToDevice);
+     j_error = cudaGetLastError();
+    if(j_error != cudaSuccess) printf("Error 4: %s\n", cudaGetErrorString(j_error));
     cudaMemcpy(d_b, b, sizeof(float)*m*m, cudaMemcpyHostToDevice);
+     j_error = cudaGetLastError();
+    if(j_error != cudaSuccess) printf("Error 5: %s\n", cudaGetErrorString(j_error));
 
     int grid_rows = (m + block_size - 1) / block_size;
     int grid_cols = (m + block_size - 1) / block_size;
@@ -81,8 +92,12 @@ int main(int argc, char const *argv[])
     dim3 dimBlock(block_size, block_size);
    
     gpu_mm<<<dimGrid, dimBlock>>>(d_a, d_b, d_c, m,m,m);    
+     j_error = cudaGetLastError();
+    if(j_error != cudaSuccess) printf("Error 6: %s\n", cudaGetErrorString(j_error));
 
     cudaMemcpy(c, d_c, sizeof(float)*m*m, cudaMemcpyDeviceToHost);
+    j_error = cudaGetLastError();
+    if(j_error != cudaSuccess) printf("Error 7: %s\n", cudaGetErrorString(j_error));
 
     cpu_mm(a,b,cpu_result,m,m,m);
 
