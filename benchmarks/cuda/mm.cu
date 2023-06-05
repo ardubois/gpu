@@ -29,13 +29,13 @@ void cpu_mm(float *h_a, float *h_b, float *h_result, int m, int n, int k) {
     }
 }
 
-void checkElementsAre(float *array1, float *array2, int N)
+void checkElementsAre(float *gpu, float *cpu, int N)
 {
   for(int i = 0; i < N; i++)
   {
-    if(array1[i] != array2[i])
+    if(gpu[i] != cpu[i])
     {
-      printf("FAIL: array1[%d] - %0.0f does not equal %0.0f\n", i, array1[i], array2[i]);
+      printf("FAIL: gpu[%d] - %0.0f does not equal cpu = %0.0f\n", i, gpu[i], cpu[i]);
       exit(1);
     }
   }
@@ -86,7 +86,7 @@ int main(int argc, char const *argv[])
 
     cpu_mm(a,b,cpu_result,m,m,m);
 
-    checkElementsAre(cpu_result,c,m*m);
+    checkElementsAre(c,cpu_result,m*m);
 
     free(a);
     free(b);
