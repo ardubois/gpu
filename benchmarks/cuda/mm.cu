@@ -45,7 +45,7 @@ void checkElementsAre(float *gpu, float *cpu, int N)
 int main(int argc, char const *argv[])
 {
     int m = 1000;
-    int block_size = 128;
+    int block_size = 16;
     cudaError_t j_error;
 
     float *a = (float*) malloc(m*m*sizeof(float));
