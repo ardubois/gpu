@@ -14,17 +14,32 @@ __global__ void gpu_mm(float *a,float *b, float *c, int m, int n, int k)
     }
 } 
 
-void checkElementsAre(float target, float *array, int N)
+void cpu_mm(float *h_a, float *h_b, float *h_result, int m, int n, int k) {
+    for (int i = 0; i < m; ++i) 
+    {
+        for (int j = 0; j < k; ++j) 
+        {
+            int tmp = 0.0;
+            for (int h = 0; h < n; ++h) 
+            {
+                tmp += h_a[i * n + h] * h_b[h * k + j];
+            }
+            h_result[i * k + j] = tmp;
+        }
+    }
+}
+
+void checkElementsAre(float *array1, float *array2, int N)
 {
   for(int i = 0; i < N; i++)
   {
-    if(array[i] != target)
+    if(array1[i] != array2[i])
     {
-      printf("FAIL: array[%d] - %0.0f does not equal %0.0f\n", i, array[i], target);
+      printf("FAIL: array1[%d] - %0.0f does not equal %0.0f\n", i, array1[i], array2[i]);
       exit(1);
     }
   }
-  printf("SUCCESS! All values added correctly.\n");
+  printf("SUCCESS! All values computed correctly.\n");
 }
 
 int main(int argc, char const *argv[])
@@ -35,6 +50,7 @@ int main(int argc, char const *argv[])
     float *a = (float*) malloc(m*m*sizeof(float));
     float *b = (float*) malloc(m*m*sizeof(float));
     float *c = (float*) malloc(m*m*sizeof(float));
+    float *cpu_result = (float*) malloc(m*m*sizeof(float));
 
     for (int i = 0; i < m; ++i) {
         for (int j = 0; j < m; ++j) {
@@ -68,7 +84,9 @@ int main(int argc, char const *argv[])
 
     cudaMemcpy(c, d_c, sizeof(float)*m*m, cudaMemcpyDeviceToHost);
 
-    checkElementsAre(5.0,c,m*m);
+    cpu_mm(a,b,cpu_result,m,m,m);
+
+    checkElementsAre(cpu_result,c,m*m);
 
     free(a);
     free(b);
