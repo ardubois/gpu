@@ -145,7 +145,8 @@ int main( void ) {
       //     printf("pixel %d = %d\n",i,pixelbuffer[i]);
     
     genBpm(height,width,h_pixelbuffer);
-    
+    free(h_pixelbuffer);
+    cudaFree(d_pixelbuffer);
 }
 
 

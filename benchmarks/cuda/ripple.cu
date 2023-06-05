@@ -120,5 +120,8 @@ int main( void ) {
 
     
     genBpm(height,width,h_pixelbuffer);
+
+    free(h_pixelbuffer);
+    cudaFree(d_pixelbuffer);
     
 }
